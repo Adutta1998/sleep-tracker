@@ -16,6 +16,8 @@
  * 
  */
 import { ref } from 'vue';
+import supabase from '../supabaseClient.js';
+
 const entryDate = ref('');
 const sleepTime = ref('');
 const wakeTime = ref('');
@@ -24,6 +26,42 @@ const screenOffTime = ref('');
 const moodMorning = ref('');
 const sleepQuality = ref(2);
 const notes = ref('');
+
+const submitForm = async () => {
+  if (sleepTime.value === '' || wakeTime.value === '') {
+    alert('Please fill in all required fields.');
+    return;
+  }
+  const formData = {
+    entry_date: entryDate.value || new Date().toISOString().split('T')[0], // Default to today if not set
+    sleep_time: sleepTime.value !== '' ? sleepTime.value : null,
+    wake_time: wakeTime.value !== '' ? wakeTime.value : null,
+    screen_off_time: screenOffTime.value !== '' ? screenOffTime.value : (sleepTime.value !== '' ? sleepTime.value : null),
+    reels_cutoff_time: reelsCutoffTime.value !== '' ? reelsCutoffTime.value : (screenOffTime.value !== '' ? screenOffTime.value : (sleepTime.value !== '' ? sleepTime.value : null)),
+    mood_morning: moodMorning.value || 'Neutral',
+    sleep_quality: sleepQuality.value ?? 2, // Default to 2 if not set
+    notes: notes.value || '',
+  };
+  const { data, error } = await supabase
+    .from('sleep_tracker')
+    .insert([formData]);
+  if (error) {
+    console.error('Error inserting data:', error);
+    alert('Failed to submit data. Please try again.');
+  } else {
+    console.log('Data submitted successfully:', data);
+    alert('Sleep data submitted successfully!');
+    // Reset form fields
+    entryDate.value = '';
+    sleepTime.value = '';
+    wakeTime.value = '';
+    reelsCutoffTime.value = '';
+    screenOffTime.value = '';
+    moodMorning.value = '';
+    sleepQuality.value = 2;
+    notes.value = '';
+  }
+};
 
 
 
@@ -38,12 +76,12 @@ const notes = ref('');
       </div>
 
       <div class="form-field">
-        <label for="sleep_time">Sleep Time:</label>
+        <label for="sleep_time">Sleep Time:*</label>
         <input type="time" id="sleep_time" v-model="sleepTime" />
       </div>
 
       <div class="form-field">
-        <label for="wake_time">Wake Time:</label>
+        <label for="wake_time">Wake Time:*</label>
         <input type="time" id="wake_time" v-model="wakeTime" />
       </div>
 
