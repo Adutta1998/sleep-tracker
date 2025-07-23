@@ -25,6 +25,29 @@
         <Bar :data="chartData" :options="chartOptions" />
       </div>
     </div>
+    <div class="card-dark w-full">
+      <h3>Sleep Data</h3>
+      <table class="w-full" border="1">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Sleep Time</th>
+            <th>Wake Time</th>
+            <th>Sleep Quality</th>
+            <th>Mood in the Morning</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="entry in sleepData" :key="entry.id">
+            <td>{{ entry.entry_date }}</td>
+            <td>{{ entry.sleep_time }}</td>
+            <td>{{ entry.wake_time }}</td>
+            <td>{{ entry.sleep_quality }}</td>
+            <td>{{ entry.mood_morning }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
 </template>
@@ -103,12 +126,11 @@ const drawChart = () => {
       {
         label: 'Mood in the Morning',
         data: sleepData.value.map(entry => {
-          switch (entry.mood_morning) {
-            case 'Happy': return 5;
-            case 'Neutral': return 3;
-            case 'Sad': return 1;
-            default: return 2; // Default mood
-          }
+          if (entry["mood_morning"]?.includes('happy')) return 5;
+          if (entry["mood_morning"]?.includes('Sleepy')) return 3;
+          if (entry["mood_morning"]?.includes('Neutral')) return 4;
+          if (entry["mood_morning"]?.includes('Tired')) return 2;
+          return 1;
         }),
         backgroundColor: 'rgba(255, 159, 64, 0.6)',
       }
@@ -144,5 +166,26 @@ select {
   border: 1px solid #ccc;
   border-radius: 4px;
   width: 100%;
+}
+
+/* table style like material design principle */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background-color: #333030;
+}
+
+td {
+  background-color: #383838;
 }
 </style>
